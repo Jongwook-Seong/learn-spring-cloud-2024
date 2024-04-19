@@ -29,7 +29,6 @@ public class OrderServiceImpl implements OrderService {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         OrderEntity orderEntity = mapper.map(orderDto, OrderEntity.class);
-
         orderRepository.save(orderEntity);
 
         OrderDto returnValue = mapper.map(orderEntity, OrderDto.class);
