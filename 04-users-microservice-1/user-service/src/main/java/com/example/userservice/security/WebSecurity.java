@@ -11,9 +11,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -48,12 +50,20 @@ public class WebSecurity {
         http.headers((headers) -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         http.authorizeHttpRequests(
             authorize -> authorize
+                    .requestMatchers(new AntPathRequestMatcher("/actuator/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/users", "POST")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
 //                    .requestMatchers(WHITE_LIST).permitAll()
                     .requestMatchers("/**").access(
                             new WebExpressionAuthorizationManager(
                                     "hasIpAddress('127.0.0.1') or hasIpAddress('192.168.0.7')"))
-                    .requestMatchers(PathRequest.toH2Console()).permitAll()
-        );
+//                    .requestMatchers(PathRequest.toH2Console()).permitAll()
+                )
+                .authenticationManager(authenticationManager)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         http.addFilter(getAuthenticationFilter(authenticationManager));
 
         return http.build();
