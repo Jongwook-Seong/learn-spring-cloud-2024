@@ -4,6 +4,12 @@ server:
 spring:
   application:
     name: user-service
+#  zipkin:
+#    base-url: http://127.0.0.1:9411
+#    enabled: true
+#  sleuth:
+#    sampler:
+#      probability: 1.0
   h2:
     console:
       enabled: true
@@ -23,6 +29,10 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
+#  cloud:
+#    openfeign:
+#      micrometer:
+#        enabled: true
 
 eureka:
   instance:
@@ -36,11 +46,22 @@ eureka:
 logging:
   level:
     com.example.userservice.client: DEBUG
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
 
 greeting:
   message: Welcome to the Simple E-commerce.
 
 management:
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      consume: b3
+      produce: b3_multi
+  zipkin:
+    tracing:
+      endpoint: "http://localhost:9411/api/v2/spans"
   endpoints:
     web:
       exposure:
